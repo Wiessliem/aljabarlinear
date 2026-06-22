@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panduan Belajar Aljabar Linier — Ruang Vektor, RHKD, Eigen & Transformasi Linier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    svg: { fontCache: 'global' },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root{
+    --indigo-950:#1e1b4b;
+    --indigo-900:#312e81;
+    --indigo-800:#3730a3;
+    --indigo-600:#4f46e5;
+    --indigo-500:#6366f1;
+    --indigo-100:#e0e7ff;
+    --indigo-50:#eef2ff;
+    --violet-50:#f5f3ff;
+    --violet-200:#ddd6fe;
+    --violet-600:#7c3aed;
+    --amber-50:#fffbeb;
+    --amber-300:#fcd34d;
+    --amber-700:#b45309;
+    --rose-50:#fff1f2;
+    --rose-300:#fda4af;
+    --rose-700:#be123c;
+    --emerald-50:#ecfdf5;
+    --emerald-500:#10b981;
+    --emerald-700:#047857;
+    --ink:#1f2233;
+    --ink-soft:#4b4f66;
+    --line:#e6e8f0;
+    --bg:#f7f8fc;
+    --term-bg:#171527;
+    --term-line:#2a2740;
+    --term-text:#e7e5ff;
+    --term-green:#7ee2b8;
+    --term-amber:#ffd479;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(20,20,50,.04),0 8px 24px rgba(30,27,75,.06);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+
+  /* ===== Header ===== */
+  header.masthead{
+    background:
+      radial-gradient(1200px 400px at 12% -20%, rgba(124,58,237,.55), transparent 60%),
+      radial-gradient(900px 360px at 95% 0%, rgba(99,102,241,.45), transparent 55%),
+      linear-gradient(135deg,var(--indigo-950),var(--indigo-900) 60%,var(--indigo-800));
+    color:#fff;padding:42px 24px 30px;position:relative;overflow:hidden;
+  }
+  header.masthead::after{
+    content:"";position:absolute;inset:0;opacity:.07;pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);
+    background-size:34px 34px;mask-image:linear-gradient(180deg,#000,transparent);
+  }
+  .mast-inner{max-width:1080px;margin:0 auto;position:relative;z-index:1}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--indigo-100);
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+    padding:6px 12px;border-radius:999px;margin-bottom:16px;
+  }
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--emerald-500);box-shadow:0 0 0 4px rgba(16,185,129,.25)}
+  header.masthead h1{
+    font-size:clamp(28px,4.2vw,44px);line-height:1.1;margin:0 0 12px;font-weight:800;letter-spacing:-.02em;
+  }
+  header.masthead h1 .accent{
+    background:linear-gradient(90deg,#c4b5fd,#a5f3fc);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .sub{color:#cdd2f5;max-width:640px;font-size:16px;margin:0}
+  .mast-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+  .chip{
+    font-size:12.5px;font-weight:500;color:#dfe3ff;background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.14);padding:6px 11px;border-radius:8px;
+  }
+  .chip b{color:#fff;font-weight:700}
+
+  /* ===== Nav tabs ===== */
+  nav.tabs{
+    position:sticky;top:0;z-index:50;background:rgba(247,248,252,.86);
+    backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--line);
+  }
+  .tabs-inner{
+    max-width:1080px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:10px 16px;
+    scrollbar-width:none;
+  }
+  .tabs-inner::-webkit-scrollbar{display:none}
+  .tab-btn{
+    flex:0 0 auto;border:1px solid transparent;background:transparent;cursor:pointer;
+    font-family:inherit;font-size:14px;font-weight:600;color:var(--ink-soft);
+    padding:9px 15px;border-radius:10px;white-space:nowrap;display:flex;align-items:center;gap:8px;
+    transition:.15s;
+  }
+  .tab-btn .num{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    color:var(--indigo-500);background:var(--indigo-50);border-radius:6px;padding:2px 6px;
+  }
+  .tab-btn:hover{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+  .tab-btn.active{background:var(--indigo-950);color:#fff;box-shadow:0 6px 18px rgba(30,27,75,.25)}
+  .tab-btn.active .num{background:rgba(255,255,255,.16);color:#c7d2fe}
+
+  /* ===== Layout ===== */
+  main{max-width:1080px;margin:0 auto;padding:30px 20px 80px}
+  .panel{display:none;animation:fade .35s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.13em;color:var(--indigo-600);font-weight:700;margin:0 0 4px}
+  h3.title{font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.02em;margin:0 0 10px;color:var(--ink)}
+  .lead{color:var(--ink-soft);font-size:16px;max-width:760px;margin:0 0 26px}
+
+  h4.block{
+    font-size:19px;font-weight:700;margin:34px 0 14px;padding-bottom:9px;
+    border-bottom:2px solid var(--line);display:flex;align-items:center;gap:10px;letter-spacing:-.01em;
+  }
+  h4.block .ic{
+    width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:14px;
+    background:var(--indigo-950);color:#fff;flex:0 0 auto;
+  }
+  h5.subblock{font-size:15.5px;font-weight:700;margin:22px 0 8px;color:var(--indigo-800)}
+
+  p{margin:0 0 12px}
+  ul,ol{margin:0 0 14px;padding-left:22px}
+  li{margin:5px 0}
+  strong{font-weight:700}
+  .muted{color:var(--ink-soft)}
+
+  /* ===== Boxes ===== */
+  .box{border-radius:var(--radius);padding:16px 18px;margin:16px 0;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow)}
+  .box .tag{
+    display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:7px;margin-bottom:8px;
+  }
+  .def{background:var(--indigo-50);border-color:var(--indigo-100)}
+  .def .tag{background:var(--indigo-600);color:#fff}
+  .thm{background:var(--violet-50);border-color:var(--violet-200)}
+  .thm .tag{background:var(--violet-600);color:#fff}
+  .tip{background:var(--amber-50);border-color:var(--amber-300)}
+  .tip .tag{background:var(--amber-700);color:#fff}
+  .warn{background:var(--rose-50);border-color:var(--rose-300)}
+  .warn .tag{background:var(--rose-700);color:#fff}
+  .box h6{margin:0 0 6px;font-size:15px;font-weight:700}
+
+  /* ===== Example (worked) ===== */
+  .ex{
+    border:1px solid var(--line);border-left:4px solid var(--indigo-500);
+    border-radius:12px;margin:18px 0;background:#fff;box-shadow:var(--shadow);overflow:hidden;
+  }
+  .ex-head{
+    background:linear-gradient(90deg,var(--indigo-50),#fff);padding:11px 16px;
+    font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--line);
+  }
+  .ex-head .badge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#fff;background:var(--indigo-600);padding:3px 8px;border-radius:6px}
+  .ex-body{padding:14px 16px}
+  .ex-body .solve{color:var(--indigo-700,#4338ca);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;margin:6px 0}
+
+  /* ===== Terminal / formula box ===== */
+  .term{
+    background:var(--term-bg);color:var(--term-text);border:1px solid var(--term-line);
+    border-radius:12px;margin:16px 0;overflow:hidden;box-shadow:0 10px 30px rgba(23,21,39,.25);
+  }
+  .term-bar{display:flex;align-items:center;gap:7px;padding:9px 14px;background:#100e1c;border-bottom:1px solid var(--term-line)}
+  .term-bar .lights{display:flex;gap:6px}
+  .term-bar i{width:11px;height:11px;border-radius:50%;display:block}
+  .term-bar i.r{background:#ff5f57}.term-bar i.y{background:#febc2e}.term-bar i.g{background:#28c840}
+  .term-bar .ttl{font-family:'JetBrains Mono',monospace;font-size:12px;color:#9b96c7;margin-left:6px}
+  .term-body{padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.9;overflow-x:auto}
+  .term-body .c-key{color:var(--term-amber)}
+  .term-body .c-ok{color:var(--term-green)}
+  .term-body .prompt{color:#6f6a98}
+  .term-body .formula-line{color:#fff}
+
+  /* ===== Tables ===== */
+  table.tbl{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+  table.tbl th{background:var(--indigo-950);color:#fff;text-align:left;padding:11px 14px;font-weight:600;font-size:13px}
+  table.tbl td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:top}
+  table.tbl tr:nth-child(even) td{background:#fafbff}
+
+  /* ===== Cards grid (home) ===== */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:18px 0}
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);
+    cursor:pointer;transition:.18s;position:relative;overflow:hidden;
+  }
+  .card:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(30,27,75,.12);border-color:var(--indigo-100)}
+  .card .kch{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--indigo-500);background:var(--indigo-50);padding:3px 9px;border-radius:7px;display:inline-block;margin-bottom:10px}
+  .card h4{margin:0 0 6px;font-size:17px;font-weight:700}
+  .card p{margin:0;font-size:13.5px;color:var(--ink-soft)}
+  .card .arrow{position:absolute;right:16px;bottom:14px;color:var(--indigo-300,#a5b4fc);font-weight:700;transition:.18s}
+  .card:hover .arrow{color:var(--indigo-600);transform:translateX(3px)}
+
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0 4px}
+  .flow .node{background:var(--indigo-950);color:#fff;padding:8px 13px;border-radius:9px;font-weight:600;font-size:13.5px}
+  .flow .arr{color:var(--indigo-500);font-weight:800;font-size:18px}
+
+  /* ===== Quiz ===== */
+  .quiz{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 14px;margin:18px 0;box-shadow:var(--shadow)}
+  .quiz .q{font-weight:700;font-size:15.5px;margin:0 0 4px}
+  .quiz .qnum{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--indigo-500);font-weight:700}
+  .opts{display:flex;flex-direction:column;gap:8px;margin:12px 0 6px}
+  .opt{
+    text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px;
+    font-family:inherit;font-size:14.5px;color:var(--ink);cursor:pointer;transition:.14s;display:flex;gap:10px;align-items:flex-start;
+  }
+  .opt .lbl{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--indigo-500);flex:0 0 auto}
+  .opt:hover{border-color:var(--indigo-300,#a5b4fc);background:var(--indigo-50)}
+  .opt.correct{border-color:var(--emerald-500);background:var(--emerald-50)}
+  .opt.correct .lbl{color:var(--emerald-700)}
+  .opt.wrong{border-color:var(--rose-300);background:var(--rose-50)}
+  .opt.wrong .lbl{color:var(--rose-700)}
+  .opt:disabled{cursor:default}
+  .explain{
+    display:none;margin-top:10px;padding:12px 14px;border-radius:10px;background:var(--indigo-50);
+    border:1px solid var(--indigo-100);font-size:14px;
+  }
+  .explain.show{display:block}
+  .explain b{color:var(--indigo-800)}
+
+  /* ===== Cheat sheet ===== */
+  .cheat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;margin-top:18px}
+  .cheat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .cheat .ch-head{background:var(--indigo-950);color:#fff;padding:11px 16px;font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:9px}
+  .cheat .ch-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(255,255,255,.16);padding:2px 7px;border-radius:6px}
+  .cheat .ch-body{padding:6px 16px 14px}
+  .cheat .row{padding:10px 0;border-bottom:1px dashed var(--line)}
+  .cheat .row:last-child{border-bottom:none}
+  .cheat .row .k{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px}
+  .cheat .row .v{font-size:14px;color:var(--ink-soft)}
+
+  /* ===== Misc ===== */
+  .callout-strip{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}
+  .pill-stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow);flex:1;min-width:150px}
+  .pill-stat .big{font-size:24px;font-weight:800;color:var(--indigo-700,#4338ca);font-family:'JetBrains Mono',monospace}
+  .pill-stat .lbl{font-size:12.5px;color:var(--ink-soft);font-weight:500}
+  footer.foot{border-top:1px solid var(--line);padding:24px 20px;text-align:center;color:var(--ink-soft);font-size:13px;background:#fff}
+  footer.foot b{color:var(--ink)}
+  .back-top{position:fixed;right:20px;bottom:20px;background:var(--indigo-950);color:#fff;border:none;width:46px;height:46px;border-radius:50%;cursor:pointer;font-size:18px;box-shadow:0 8px 22px rgba(30,27,75,.3);opacity:0;pointer-events:none;transition:.2s;z-index:60}
+  .back-top.show{opacity:1;pointer-events:auto}
+  @media (max-width:560px){
+    header.masthead{padding:32px 18px 24px}
+    .ex-body,.term-body{font-size:12.5px}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="mast-inner">
+    <span class="eyebrow"><span class="dot"></span> Catatan Kuliah · MSA01 Aljabar Linier</span>
+    <h1>Panduan Belajar <span class="accent">Aljabar Linier</span></h1>
+    <p class="sub">Rangkuman lengkap, rumus kunci, contoh terselesaikan, dan kuis untuk Bab Ruang Vektor, Ruang Hasil Kali Dalam, Nilai Eigen, dan Transformasi Linier.</p>
+    <div class="mast-meta">
+      <span class="chip">📘 <b>4 Bab inti</b> · Bab 3–5</span>
+      <span class="chip">✍️ <b>30+ contoh</b> terselesaikan</span>
+      <span class="chip">🧮 <b>Cheat sheet</b> rumus</span>
+      <span class="chip">🎯 Kuis interaktif</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tabs-inner" id="tabBar">
+    <button class="tab-btn active" data-tab="home"><span class="num">★</span> Peta Materi</button>
+    <button class="tab-btn" data-tab="rv"><span class="num">B3</span> Ruang Vektor</button>
+    <button class="tab-btn" data-tab="rhkd"><span class="num">3.2</span> Hasil Kali Dalam</button>
+    <button class="tab-btn" data-tab="eigen"><span class="num">B4</span> Eigen &amp; Diagonalisasi</button>
+    <button class="tab-btn" data-tab="tl"><span class="num">B5</span> Transformasi Linier</button>
+    <button class="tab-btn" data-tab="quiz"><span class="num">?</span> Latihan &amp; Kuis</button>
+    <button class="tab-btn" data-tab="cheat"><span class="num">Σ</span> Cheat Sheet</button>
+  </div>
+</nav>
+
+<main id="main">
+<!-- ================= HOME ================= -->
+<section class="panel active" id="tab-home">
+  <h2 class="sec">Mulai di sini</h2>
+  <h3 class="title">Peta Materi & Cara Pakai</h3>
+  <p class="lead">Panduan ini merangkum empat bab inti Aljabar Linier. Tiap bab punya alur yang sama: <strong>definisi → teorema → rumus kunci → contoh terselesaikan → tips</strong>. Klik kartu di bawah untuk lompat ke bab, atau gunakan tab di atas.</p>
+
+  <div class="callout-strip">
+    <div class="pill-stat"><div class="big">4</div><div class="lbl">Bab inti (Bab 3–5)</div></div>
+    <div class="pill-stat"><div class="big">15+</div><div class="lbl">Definisi & teorema kunci</div></div>
+    <div class="pill-stat"><div class="big">30+</div><div class="lbl">Contoh terselesaikan</div></div>
+    <div class="pill-stat"><div class="big">12</div><div class="lbl">Soal kuis interaktif</div></div>
+  </div>
+
+  <h4 class="block"><span class="ic">🗺️</span> Bagaimana semua topik terhubung</h4>
+  <p>Aljabar Linier dibangun bertingkat. Konsep <strong>ruang vektor</strong> adalah fondasinya; di atasnya kita menambah struktur "panjang & sudut" (hasil kali dalam), lalu mempelajari bagaimana sebuah matriks "merentangkan" arah tertentu (eigen), dan akhirnya bagaimana memetakan satu ruang ke ruang lain (transformasi linier).</p>
+  <div class="flow">
+    <span class="node">Ruang Vektor + Basis</span><span class="arr">→</span>
+    <span class="node">Hasil Kali Dalam (sudut, ortogonal)</span><span class="arr">→</span>
+    <span class="node">Eigen & Diagonalisasi</span><span class="arr">→</span>
+    <span class="node">Transformasi Linier</span>
+  </div>
+  <p class="muted" style="font-size:14px">Perhatikan benang merahnya: <strong>OBE (Operasi Baris Elementer)</strong> dan konsep <strong>basis</strong> muncul di hampir semua bab. Kuasai keduanya dulu.</p>
+
+  <h4 class="block"><span class="ic">📚</span> Jelajahi per bab</h4>
+  <div class="grid">
+    <div class="card" data-goto="rv">
+      <span class="kch">BAB 3</span>
+      <h4>Ruang Vektor Umum</h4>
+      <p>10 aksioma, subruang, merentang, bebas linier, basis & dimensi, koordinat, ruang baris/kolom/null, rank & nulitas.</p>
+      <span class="arrow">→</span>
+    </div>
+    <div class="card" data-goto="rhkd">
+      <span class="kch">BAB 3.2</span>
+      <h4>Ruang Hasil Kali Dalam</h4>
+      <p>Aksioma hasil kali dalam, norm & jarak, bobot, ortogonalitas, Cauchy-Schwarz, pelengkap ortogonal, Gram-Schmidt.</p>
+      <span class="arrow">→</span>
+    </div>
+    <div class="card" data-goto="eigen">
+      <span class="kch">BAB 4</span>
+      <h4>Nilai & Vektor Eigen</h4>
+      <p>Persamaan karakteristik, ruang eigen, kriteria invers, diagonalisasi \(D=P^{-1}AP\), dan pangkat matriks \(A^k\).</p>
+      <span class="arrow">→</span>
+    </div>
+    <div class="card" data-goto="tl">
+      <span class="kch">BAB 5</span>
+      <h4>Transformasi Linier</h4>
+      <p>Sifat linier, transformasi via basis, kernel & range, rank-nulitas, transformasi satu-satu & invers, matriks transformasi.</p>
+      <span class="arrow">→</span>
+    </div>
+  </div>
+
+  <div class="box tip">
+    <span class="tag">💡 Strategi belajar</span>
+    <h6>Urutan paling efektif</h6>
+    <ol style="margin-bottom:0">
+      <li><strong>Pahami definisi</strong> dulu (apa yang ditanyakan?), jangan langsung ke rumus.</li>
+      <li><strong>Kerjakan ulang contoh</strong> sambil tutup penyelesaiannya — cek setelah selesai.</li>
+      <li><strong>Hafal pola</strong>: hampir semua soal berujung pada menyusun matriks augmented lalu OBE.</li>
+      <li><strong>Uji diri</strong> di tab <em>Latihan &amp; Kuis</em>, lalu rapikan dengan <em>Cheat Sheet</em>.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= RUANG VEKTOR ================= -->
+<section class="panel" id="tab-rv">
+  <h2 class="sec">Bab 3</h2>
+  <h3 class="title">Ruang Vektor Umum</h3>
+  <p class="lead">Vektor tidak harus berupa panah di \(\mathbb{R}^2\) atau \(\mathbb{R}^3\). Objek apa pun — fungsi, polinomial, matriks — bisa diperlakukan sebagai vektor asalkan memenuhi 10 aksioma terhadap operasi penjumlahan dan perkalian skalar.</p>
+
+  <h4 class="block"><span class="ic">1</span> Definisi & 10 Aksioma</h4>
+  <div class="box def">
+    <span class="tag">Definisi 3.1 — Ruang Vektor</span>
+    <p style="margin-bottom:0">Ruang vektor (<em>vector space</em>) adalah himpunan objek yang dilengkapi dua operasi: <strong>penjumlahan</strong> dan <strong>perkalian skalar</strong>.</p>
+  </div>
+  <div class="box thm">
+    <span class="tag">Teorema 3.1 — Aksioma Ruang Vektor</span>
+    <p>Himpunan tak kosong \(V\) disebut ruang vektor jika untuk semua \(\mathbf{u},\mathbf{v},\mathbf{w}\in V\) dan semua skalar \(c,d\) berlaku:</p>
+    <table class="tbl" style="box-shadow:none;margin:8px 0 0">
+      <tr><th style="width:50%">Aksioma penjumlahan</th><th>Aksioma perkalian skalar</th></tr>
+      <tr>
+        <td>(1) \(\mathbf{u}+\mathbf{v}\in V\) (tertutup)</td>
+        <td>(6) \(c\mathbf{u}\in V\) (tertutup)</td>
+      </tr>
+      <tr>
+        <td>(2) \(\mathbf{u}+\mathbf{v}=\mathbf{v}+\mathbf{u}\)</td>
+        <td>(7) \(c(\mathbf{u}+\mathbf{v})=c\mathbf{u}+c\mathbf{v}\)</td>
+      </tr>
+      <tr>
+        <td>(3) \((\mathbf{u}+\mathbf{v})+\mathbf{w}=\mathbf{u}+(\mathbf{v}+\mathbf{w})\)</td>
+        <td>(8) \((c+d)\mathbf{u}=c\mathbf{u}+d\mathbf{u}\)</td>
+      </tr>
+      <tr>
+        <td>(4) ada \(\mathbf{0}\): \(\mathbf{u}+\mathbf{0}=\mathbf{u}\)</td>
+        <td>(9) \(c(d\mathbf{u})=(cd)\mathbf{u}\)</td>
+      </tr>
+      <tr>
+        <td>(5) ada \(-\mathbf{u}\): \(\mathbf{u}+(-\mathbf{u})=\mathbf{0}\)</td>
+        <td>(10) \(1\mathbf{u}=\mathbf{u}\)</td>
+      </tr>
+    </table>
+  </div>
+  <h5 class="subblock">Contoh ruang vektor</h5>
+  <ul>
+    <li>\(\mathbb{R}^n\) — \(n\)-tupel bilangan real.</li>
+    <li>\(F\) — himpunan semua fungsi bernilai real \(f(x)\) untuk \(-\infty&lt;x&lt;\infty\).</li>
+    <li>\(M_{2\times2}\) — himpunan matriks \(2\times2\) berelemen real.</li>
+    <li>\(P_n\) — polinomial berderajat \(\le n\). <strong>Ruang vektor nol</strong> hanya berisi \(\{\mathbf{0}\}\).</li>
+  </ul>
+  <div class="box">
+    <h6>Sifat-sifat "vektor" pada ruang vektor</h6>
+    <p style="margin-bottom:0">Jika \(V\) ruang vektor, \(\mathbf{u}\in V\), dan \(c\) skalar, maka: &nbsp; (1) \(0\mathbf{u}=\mathbf{0}\) &nbsp;·&nbsp; (2) \(c\mathbf{0}=\mathbf{0}\) &nbsp;·&nbsp; (3) \((-1)\mathbf{u}=-\mathbf{u}\) &nbsp;·&nbsp; (4) jika \(c\mathbf{u}=\mathbf{0}\) maka \(c=0\) atau \(\mathbf{u}=\mathbf{0}\).</p>
+  </div>
+
+  <h4 class="block"><span class="ic">2</span> Subruang Vektor</h4>
+  <div class="box def">
+    <span class="tag">Definisi 3.2 — Subruang</span>
+    <p>Jika \(V\) ruang vektor dan \(W\subset V\), maka \(W\) adalah subruang \(\iff\) memenuhi dua syarat tertutup:</p>
+    <p style="margin-bottom:0">(i) jika \(\mathbf{u},\mathbf{v}\in W\) maka \(\mathbf{u}+\mathbf{v}\in W\); &nbsp;&nbsp; (ii) jika \(c\) skalar dan \(\mathbf{u}\in W\) maka \(c\mathbf{u}\in W\).</p>
+  </div>
+  <div class="box tip">
+    <span class="tag">💡 Trik cepat</span>
+    <p style="margin-bottom:0">Untuk mengecek subruang, cukup uji <strong>dua sifat tertutup</strong> di atas. Jika \(\mathbf{0}\notin W\), langsung bukan subruang (gagal aksioma 4).</p>
+  </div>
+
+  <h4 class="block"><span class="ic">3</span> Merentang (Span) & Bebas Linier</h4>
+  <div class="box def">
+    <span class="tag">Definisi 3.3 — Merentang</span>
+    <p style="margin-bottom:0">\(S=\{\mathbf{v}_1,\dots,\mathbf{v}_r\}\) <strong>merentang</strong> \(V\) jika setiap \(\mathbf{v}\in V\) dapat ditulis sebagai kombinasi linier \(k_1\mathbf{v}_1+\dots+k_r\mathbf{v}_r=\mathbf{v}\) (SPL <strong>konsisten</strong>). Ditulis \(W=\text{span}(S)\).</p>
+  </div>
+  <div class="box def">
+    <span class="tag">Definisi 3.4 — Bebas Linier</span>
+    <p style="margin-bottom:0">\(S\) <strong>bebas linier</strong> jika SPL homogen \(k_1\mathbf{v}_1+\dots+k_r\mathbf{v}_r=\mathbf{0}\) hanya punya <strong>solusi trivial</strong> \(k_1=\dots=k_r=0\). Jika ada solusi lain → bergantung linier.</p>
+  </div>
+  <div class="box warn">
+    <span class="tag">⚠️ Aturan jumlah</span>
+    <p style="margin-bottom:0">Jika \(S=\{\mathbf{v}_1,\dots,\mathbf{v}_r\}\subset\mathbb{R}^n\) dan \(r&gt;n\), maka \(S\) <strong>pasti tidak bebas linier</strong> (terlalu banyak vektor untuk dimensinya).</p>
+  </div>
+
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 3.5</span> Apakah vektor merentang \(\mathbb{R}^3\)?</div>
+    <div class="ex-body">
+      <p>Selidiki \(\mathbf{v}_1=(1,2,1),\ \mathbf{v}_2=(2,9,0),\ \mathbf{v}_3=(3,3,4)\).</p>
+      <div class="solve">Penyelesaian</div>
+      <p>Bentuk \(k_1\mathbf{v}_1+k_2\mathbf{v}_2+k_3\mathbf{v}_3=\mathbf{b}\), susun matriks augmented lalu OBE:</p>
+      <p>\[\left[\begin{array}{ccc|c}1&amp;2&amp;3&amp;b_1\\2&amp;9&amp;3&amp;b_2\\1&amp;0&amp;4&amp;b_3\end{array}\right]\xrightarrow{\text{OBE}}\left[\begin{array}{ccc|c}1&amp;0&amp;0&amp;-36b_1+8b_2+21b_3\\0&amp;1&amp;0&amp;5b_1-b_2-3b_3\\0&amp;0&amp;1&amp;9b_1-2b_2-5b_3\end{array}\right]\]</p>
+      <p style="margin-bottom:0">Karena diperoleh \(k_1,k_2,k_3\) <strong>tunggal</strong> untuk sembarang \(\mathbf{b}\), maka \(\mathbb{R}^3=\text{span}\{\mathbf{v}_1,\mathbf{v}_2,\mathbf{v}_3\}\). ✓</p>
+    </div>
+  </div>
+  <div class="box tip">
+    <span class="tag">💡 Baca hasil OBE</span>
+    <p style="margin-bottom:0">Setelah OBE, baris nol di kiri dengan ruas kanan \(\ne0\) → <strong>tak ada solusi</strong> (tidak merentang). Jika baris nol total → solusi tak hingga (tetap tidak merentang seluruh ruang). Tanpa baris nol → <strong>merentang</strong>.</p>
+  </div>
+
+  <h4 class="block"><span class="ic">4</span> Basis & Dimensi</h4>
+  <div class="box def">
+    <span class="tag">Definisi 3.5 — Basis</span>
+    <p style="margin-bottom:0">\(S\) adalah <strong>basis</strong> untuk \(V\) jika: (i) \(S\) <strong>merentang</strong> \(V\), <em>dan</em> (ii) \(S\) <strong>bebas linier</strong>. Basis = himpunan "minimal" yang cukup untuk membangun seluruh ruang.</p>
+  </div>
+  <div class="box def">
+    <span class="tag">Definisi 3.6 — Dimensi</span>
+    <p style="margin-bottom:0">\(\dim(V)\) = banyaknya vektor pada basis \(V\).</p>
+  </div>
+  <div class="term">
+    <div class="term-bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="ttl">dimensi_standar.txt</span></div>
+    <div class="term-body">
+<span class="prompt">›</span> <span class="c-key">dim</span>(ℝⁿ) <span class="formula-line">= n</span>          <span class="prompt"># basis standar e₁,…,eₙ</span><br>
+<span class="prompt">›</span> <span class="c-key">dim</span>(Pₙ) <span class="formula-line">= n + 1</span>      <span class="prompt"># basis 1, x, x², …, xⁿ</span><br>
+<span class="prompt">›</span> <span class="c-key">dim</span>(M<sub>m×n</sub>) <span class="formula-line">= m · n</span>   <span class="prompt"># basis matriks satuan</span>
+    </div>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 3.10</span> Basis & dimensi ruang solusi SPL homogen</div>
+    <div class="ex-body">
+      <p>Setelah OBE, SPL homogen tereduksi memberi \(x_1=0,\ x_2=-t,\ x_3=-t,\ x_4=0,\ x_5=t\). Solusi:</p>
+      <p>\[\mathbf{x}=t\begin{bmatrix}0\\-1\\-1\\0\\1\end{bmatrix}\]</p>
+      <p style="margin-bottom:0">Hanya ada <strong>1 parameter</strong> \((t)\), jadi basis ruang solusi punya 1 vektor → <strong>dimensi = 1</strong>.</p>
+    </div>
+  </div>
+
+  <h4 class="block"><span class="ic">5</span> Koordinat & Perubahan Basis</h4>
+  <div class="box def">
+    <span class="tag">Vektor koordinat</span>
+    <p style="margin-bottom:0">Jika \(S=\{\mathbf{v}_1,\dots,\mathbf{v}_r\}\) basis dan \(\mathbf{v}=c_1\mathbf{v}_1+\dots+c_r\mathbf{v}_r\), maka koordinat \(\mathbf{v}\) relatif terhadap \(S\) adalah \((\mathbf{v})_S=(c_1,\dots,c_r)\), atau bentuk kolom \([\mathbf{v}]_S\).</p>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 3.11</span> Mencari vektor koordinat</div>
+    <div class="ex-body">
+      <p>Basis \(\mathbf{v}_1=(1,1,0),\mathbf{v}_2=(1,0,1),\mathbf{v}_3=(0,1,3)\). Cari \((\mathbf{v})_S\) untuk \(\mathbf{v}=(5,-1,9)\).</p>
+      <div class="solve">Penyelesaian</div>
+      <p>Susun \(\mathbf{v}=c_1\mathbf{v}_1+c_2\mathbf{v}_2+c_3\mathbf{v}_3\), OBE memberi \(c_1=-\tfrac52,\ c_2=\tfrac92,\ c_3=\tfrac32\).</p>
+      <p style="margin-bottom:0">Jadi \((\mathbf{v})_S=\left(-\tfrac52,\tfrac92,\tfrac32\right)\).</p>
+    </div>
+  </div>
+  <div class="box thm">
+    <span class="tag">Matriks transisi</span>
+    <p>Mengubah basis \(B\to B'\): \(\quad[\mathbf{v}]_{B'}=P\,[\mathbf{v}]_B\)</p>
+    <p style="margin-bottom:0">Kolom-kolom \(P\) adalah koordinat vektor basis lama relatif terhadap basis baru. \(P\) disebut <strong>matriks transisi</strong> dari \(B\) ke \(B'\).</p>
+  </div>
+
+  <h4 class="block"><span class="ic">6</span> Ruang Baris, Kolom & Null</h4>
+  <div class="box def">
+    <span class="tag">Definisi 3.7</span>
+    <p>Untuk matriks \(A_{m\times n}\):</p>
+    <ul style="margin-bottom:0">
+      <li><strong>Ruang baris</strong> — subruang \(\mathbb{R}^n\) direntang vektor baris \(A\).</li>
+      <li><strong>Ruang kolom</strong> — subruang \(\mathbb{R}^m\) direntang vektor kolom \(A\).</li>
+      <li><strong>Ruang null</strong> — ruang solusi \(A\mathbf{x}=\mathbf{0}\) (subruang \(\mathbb{R}^n\)).</li>
+    </ul>
+  </div>
+  <div class="box tip">
+    <span class="tag">💡 Cara cari basis (setelah Gauss-Jordan → \(E\))</span>
+    <ul style="margin-bottom:0">
+      <li>Basis <strong>ruang baris</strong> = baris-baris \(E\) yang punya 1 utama.</li>
+      <li>Basis <strong>ruang kolom</strong> = kolom-kolom <em>asli \(A\)</em> yang posisinya bersesuaian dengan 1 utama di \(E\).</li>
+      <li>Basis <strong>ruang null</strong> = vektor-vektor di depan parameter pada solusi umum \(A\mathbf{x}=\mathbf{0}\).</li>
+    </ul>
+  </div>
+  <div class="box thm">
+    <span class="tag">Teorema 3.3 & 3.4</span>
+    <p style="margin-bottom:0">\(A\mathbf{x}=\mathbf{b}\) konsisten \(\iff\) \(\mathbf{b}\) berada di ruang kolom \(A\). &nbsp; Solusi umum berbentuk \(\mathbf{x}=\mathbf{x}_0+c_1\mathbf{v}_1+\dots+c_r\mathbf{v}_r\) (khusus + homogen).</p>
+  </div>
+
+  <h4 class="block"><span class="ic">7</span> Rank & Nulitas</h4>
+  <div class="box def">
+    <span class="tag">Definisi 3.8 — Rank & Nulitas</span>
+    <p>\(\text{rank}(A)=\dim(\text{ruang baris})=\dim(\text{ruang kolom})\) &nbsp;·&nbsp; \(\text{nulitas}(A)=\dim(\text{ruang null})\).</p>
+    <p style="margin-bottom:0"><strong>Teorema Rank–Nulitas:</strong> untuk \(A_{m\times n}\), &nbsp; \(\boxed{\text{rank}(A)+\text{nulitas}(A)=n}\)</p>
+  </div>
+  <div class="term">
+    <div class="term-bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="ttl">rank_nulitas.txt</span></div>
+    <div class="term-body">
+<span class="prompt">›</span> <span class="c-key">rank</span>(A)    <span class="formula-line">= banyaknya variabel utama (1 utama)</span><br>
+<span class="prompt">›</span> <span class="c-key">nulitas</span>(A) <span class="formula-line">= banyaknya parameter bebas</span><br>
+<span class="prompt">›</span> <span class="c-ok">rank + nulitas = n  (jumlah kolom A)</span> ✓
+    </div>
+  </div>
+  <div class="box tip">
+    <span class="tag">💡 Hubungan</span>
+    <p style="margin-bottom:0">Ruang baris & ruang kolom selalu <strong>berdimensi sama</strong> (Teorema 3.5). Jadi hitung rank cukup sekali dari bentuk eselon.</p>
+  </div>
+</section>
+
+<!-- ================= RHKD ================= -->
+<section class="panel" id="tab-rhkd">
+  <h2 class="sec">Bab 3.2</h2>
+  <h3 class="title">Ruang Hasil Kali Dalam (RHKD)</h3>
+  <p class="lead">Hasil kali dalam (<em>inner product</em>) menambahkan gagasan <strong>panjang, jarak, dan sudut</strong> ke ruang vektor. Ditulis \(\langle\mathbf{u},\mathbf{v}\rangle\), dan generalisasi dari hasil kali titik \(\mathbf{u}\cdot\mathbf{v}\).</p>
+
+  <h4 class="block"><span class="ic">1</span> Aksioma Hasil Kali Dalam</h4>
+  <div class="box def">
+    <span class="tag">Definisi 3.9 — Inner Product</span>
+    <p>Fungsi \(\langle\mathbf{u},\mathbf{v}\rangle\) disebut hasil kali dalam jika untuk semua \(\mathbf{u},\mathbf{v},\mathbf{w}\) dan skalar \(k\):</p>
+    <ol style="margin-bottom:0">
+      <li><strong>Simetri:</strong> \(\langle\mathbf{u},\mathbf{v}\rangle=\langle\mathbf{v},\mathbf{u}\rangle\)</li>
+      <li><strong>Aditif:</strong> \(\langle\mathbf{u}+\mathbf{v},\mathbf{w}\rangle=\langle\mathbf{u},\mathbf{w}\rangle+\langle\mathbf{v},\mathbf{w}\rangle\)</li>
+      <li><strong>Homogen:</strong> \(\langle k\mathbf{u},\mathbf{v}\rangle=k\langle\mathbf{u},\mathbf{v}\rangle\)</li>
+      <li><strong>Positif:</strong> \(\langle\mathbf{v},\mathbf{v}\rangle\ge0\), dan \(=0\iff\mathbf{v}=\mathbf{0}\)</li>
+    </ol>
+  </div>
+
+  <h4 class="block"><span class="ic">2</span> Norm, Jarak & Bobot</h4>
+  <div class="box thm">
+    <span class="tag">Definisi 3.10 — Norm & Jarak</span>
+    <p>Norm (panjang): \(\quad\|\mathbf{v}\|=\sqrt{\langle\mathbf{v},\mathbf{v}\rangle}\)</p>
+    <p style="margin-bottom:0">Jarak: \(\quad d(\mathbf{u},\mathbf{v})=\|\mathbf{u}-\mathbf{v}\|=\sqrt{\langle\mathbf{u}-\mathbf{v},\,\mathbf{u}-\mathbf{v}\rangle}\). &nbsp; Vektor dengan norm 1 = <strong>vektor satuan</strong>.</p>
+  </div>
+  <div class="box def">
+    <span class="tag">Pers. 3.15 — Hasil kali dalam berbobot</span>
+    <p style="margin-bottom:0">Dengan bobot positif \(w_1,\dots,w_n&gt;0\): &nbsp; \(\langle\mathbf{u},\mathbf{v}\rangle=w_1u_1v_1+w_2u_2v_2+\dots+w_nu_nv_n\)</p>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 3.17</span> Norm & jarak dengan bobot</div>
+    <div class="ex-body">
+      <p>\(\mathbf{u}=(1,0),\ \mathbf{v}=(0,1)\), dengan \(\langle\mathbf{u},\mathbf{v}\rangle=3u_1v_1+2u_2v_2\).</p>
+      <div class="solve">Penyelesaian</div>
+      <p>\(\|\mathbf{u}\|=\sqrt{3(1)(1)+2(0)(0)}=\sqrt3\), &nbsp; \(\|\mathbf{v}\|=\sqrt{3(0)(0)+2(1)(1)}=\sqrt2\).</p>
+      <p style="margin-bottom:0">\(\mathbf{u}-\mathbf{v}=(1,-1)\Rightarrow d(\mathbf{u},\mathbf{v})=\sqrt{3(1)^2+2(-1)^2}=\sqrt5\).</p>
+    </div>
+  </div>
+
+  <h5 class="subblock">Hasil kali dalam pada ruang lain</h5>
+  <table class="tbl">
+    <tr><th>Ruang</th><th>Definisi hasil kali dalam</th></tr>
+    <tr><td>\(\mathbb{R}^n\) (Euclid)</td><td>\(\langle\mathbf{u},\mathbf{v}\rangle=u_1v_1+\dots+u_nv_n\)</td></tr>
+    <tr><td>via matriks \(A\) (invertibel)</td><td>\(\langle\mathbf{u},\mathbf{v}\rangle_A=A\mathbf{u}\cdot A\mathbf{v}\)</td></tr>
+    <tr><td>Matriks \(M_{n\times n}\)</td><td>\(\langle A,B\rangle=\text{tr}(A^TB)\)</td></tr>
+    <tr><td>Polinomial \(P_n\)</td><td>\(\langle p,q\rangle=a_0b_0+a_1b_1+\dots+a_nb_n\)</td></tr>
+    <tr><td>Fungsi kontinu di \([a,b]\)</td><td>\(\langle f,g\rangle=\int_a^b f(x)g(x)\,dx\)</td></tr>
+  </table>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 3.19</span> Hasil kali dalam matriks (trace)</div>
+    <div class="ex-body">
+      <p>\(u=\begin{bmatrix}1&amp;2\\3&amp;4\end{bmatrix},\ v=\begin{bmatrix}-1&amp;0\\3&amp;2\end{bmatrix}\). Cari \(\|u\|,\|v\|,\langle u,v\rangle\).</p>
+      <div class="solve">Penyelesaian</div>
+      <p>\(\|u\|=\sqrt{\text{tr}(A^TA)}=\sqrt{10+20}=\sqrt{30}\), &nbsp; \(\|v\|=\sqrt{10+4}=\sqrt{14}\).</p>
+      <p style="margin-bottom:0">\(\langle u,v\rangle=\text{tr}(A^TB)=8+8=16\).</p>
+    </div>
+  </div>
+
+  <h4 class="block"><span class="ic">3</span> Sudut & Ortogonalitas</h4>
+  <div class="box thm">
+    <span class="tag">Sudut & Cauchy-Schwarz</span>
+    <p>Sudut: \(\quad\theta=\cos^{-1}\!\left(\dfrac{\langle\mathbf{u},\mathbf{v}\rangle}{\|\mathbf{u}\|\,\|\mathbf{v}\|}\right)\)</p>
+    <p style="margin-bottom:0"><strong>Teorema 3.8 (Cauchy-Schwarz):</strong> \(\;|\langle\mathbf{u},\mathbf{v}\rangle|\le\|\mathbf{u}\|\,\|\mathbf{v}\|\)</p>
+  </div>
+  <div class="box def">
+    <span class="tag">Definisi 3.11 & 3.12 — Ortogonal</span>
+    <p>\(\mathbf{u}\) dan \(\mathbf{v}\) <strong>ortogonal</strong> \(\iff\langle\mathbf{u},\mathbf{v}\rangle=0\).</p>
+    <p style="margin-bottom:0"><strong>Pelengkap ortogonal</strong> \(W^\perp\) = semua vektor di \(V\) yang ortogonal terhadap setiap vektor di \(W\).</p>
+  </div>
+  <div class="box thm">
+    <span class="tag">Teorema 3.9 — Sifat \(W^\perp\)</span>
+    <p style="margin-bottom:0">(a) \(W^\perp\) subruang dari \(V\); &nbsp; (b) \(W\cap W^\perp=\{\mathbf{0}\}\); &nbsp; (c) jika \(W\) berhingga, \((W^\perp)^\perp=W\).</p>
+  </div>
+
+  <h4 class="block"><span class="ic">4</span> Proses Gram-Schmidt</h4>
+  <p>Mengubah basis sembarang \(\{\mathbf{u}_1,\dots,\mathbf{u}_r\}\) menjadi basis <strong>ortogonal</strong> \(\{\mathbf{v}_1,\dots,\mathbf{v}_r\}\), lalu <strong>ortonormal</strong> dengan normalisasi.</p>
+  <div class="term">
+    <div class="term-bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="ttl">gram_schmidt.algo</span></div>
+    <div class="term-body">
+<span class="prompt">Step 1 ›</span> <span class="formula-line">v₁ = u₁</span><br>
+<span class="prompt">Step 2 ›</span> <span class="formula-line">v₂ = u₂ − (⟨u₂,v₁⟩ / ‖v₁‖²) · v₁</span><br>
+<span class="prompt">Step 3 ›</span> <span class="formula-line">v₃ = u₃ − (⟨u₃,v₁⟩/‖v₁‖²)·v₁ − (⟨u₃,v₂⟩/‖v₂‖²)·v₂</span><br>
+<span class="prompt">  ⋮</span>     <span class="prompt"># lanjutkan hingga vᵣ</span><br>
+<span class="prompt">Normalisasi ›</span> <span class="c-ok">qᵢ = vᵢ / ‖vᵢ‖   → basis ortonormal</span> ✓
+    </div>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 3.25</span> Gram-Schmidt di \(\mathbb{R}^3\)</div>
+    <div class="ex-body">
+      <p>Basis \(\mathbf{u}_1=(1,1,1),\mathbf{u}_2=(0,1,1),\mathbf{u}_3=(0,0,1)\).</p>
+      <div class="solve">Penyelesaian (ringkas)</div>
+      <p>\(\mathbf{v}_1=(1,1,1)\). &nbsp; \(\langle\mathbf{u}_2,\mathbf{v}_1\rangle=2\Rightarrow\mathbf{v}_2=\left(-\tfrac23,\tfrac13,\tfrac13\right)\).</p>
+      <p>\(\mathbf{v}_3=\left(0,-\tfrac12,\tfrac12\right)\).</p>
+      <p style="margin-bottom:0"><strong>Ortonormal:</strong> \(\mathbf{q}_1=\tfrac{1}{\sqrt3}(1,1,1),\ \mathbf{q}_2=\tfrac{1}{\sqrt6}(-2,1,1),\ \mathbf{q}_3=\tfrac{1}{\sqrt2}(0,-1,1)\).</p>
+    </div>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 3.26</span> Gram-Schmidt pada \(P_2\) (integral)</div>
+    <div class="ex-body">
+      <p>Basis \(\{1,x,x^2\}\) dengan \(\langle f,g\rangle=\int_{-1}^{1}f(x)g(x)\,dx\).</p>
+      <div class="solve">Hasil</div>
+      <p>Basis ortogonal: \(\;v_1=1,\;v_2=x,\;v_3=x^2-\tfrac13\).</p>
+      <p style="margin-bottom:0">Basis ortonormal: \(\;q_1=\tfrac{1}{\sqrt2},\;q_2=\tfrac{\sqrt6}{2}x,\;q_3=\tfrac{3\sqrt{10}}{4}\left(x^2-\tfrac13\right)\). &nbsp;<span class="muted">(Ini menghasilkan polinomial Legendre!)</span></p>
+    </div>
+  </div>
+  <div class="box tip">
+    <span class="tag">💡 Kunci sukses Gram-Schmidt</span>
+    <p style="margin-bottom:0">Selalu pakai <strong>hasil kali dalam yang didefinisikan soal</strong> (Euclid, bobot, trace, atau integral). Kesalahan paling umum: salah hitung \(\|\mathbf{v}_i\|^2=\langle\mathbf{v}_i,\mathbf{v}_i\rangle\) di penyebut.</p>
+  </div>
+</section>
+
+<!-- ================= EIGEN ================= -->
+<section class="panel" id="tab-eigen">
+  <h2 class="sec">Bab 4</h2>
+  <h3 class="title">Nilai Eigen, Vektor Eigen & Diagonalisasi</h3>
+  <p class="lead">Vektor eigen adalah arah istimewa yang <strong>tidak berubah arah</strong> saat dikalikan matriks \(A\) — hanya diperpanjang/diperpendek dengan faktor \(\lambda\) (nilai eigen). Inti dari diagonalisasi dan pemodelan dinamis.</p>
+
+  <h4 class="block"><span class="ic">1</span> Definisi & Persamaan Karakteristik</h4>
+  <div class="box def">
+    <span class="tag">Definisi 4.1</span>
+    <p style="margin-bottom:0">Untuk \(A_{n\times n}\), vektor tak nol \(\mathbf{x}\) dan skalar \(\lambda\) yang memenuhi &nbsp; \(\boxed{A\mathbf{x}=\lambda\mathbf{x}}\) &nbsp; disebut: \(\lambda\) = <strong>nilai eigen</strong>, \(\mathbf{x}\) = <strong>vektor eigen</strong>.</p>
+  </div>
+  <div class="box thm">
+    <span class="tag">Teorema 4.1 — Persamaan Karakteristik</span>
+    <p>Dari \(A\mathbf{x}=\lambda\mathbf{x}\Rightarrow(A-\lambda I)\mathbf{x}=\mathbf{0}\). Agar ada solusi tak nol:</p>
+    <p style="margin-bottom:0">\[\det(A-\lambda I)=0\]</p>
+  </div>
+  <div class="box tip">
+    <span class="tag">💡 Pintasan</span>
+    <p style="margin-bottom:0">Nilai eigen matriks <strong>segitiga</strong> atau <strong>diagonal</strong> = elemen-elemen pada <strong>diagonal utama</strong>. Tak perlu hitung determinan!</p>
+  </div>
+
+  <h4 class="block"><span class="ic">2</span> Ruang Eigen</h4>
+  <div class="box def">
+    <span class="tag">Teorema 4.2 — Ruang Eigen</span>
+    <p style="margin-bottom:0">Vektor eigen untuk \(\lambda\) memenuhi \((A-\lambda I)\mathbf{x}=\mathbf{0}\). Ruang solusinya disebut <strong>ruang eigen</strong> = ruang null dari \((A-\lambda I)\).</p>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 4.2–4.3</span> Nilai & vektor eigen \(2\times2\)</div>
+    <div class="ex-body">
+      <p>\(A=\begin{bmatrix}3&amp;0\\8&amp;-1\end{bmatrix}\).</p>
+      <div class="solve">Nilai eigen</div>
+      <p>\(\det\begin{bmatrix}3-\lambda&amp;0\\8&amp;-1-\lambda\end{bmatrix}=(3-\lambda)(-1-\lambda)=0\Rightarrow\lambda_1=-1,\ \lambda_2=3\).</p>
+      <div class="solve">Vektor eigen</div>
+      <p>Untuk \(\lambda_1=-1\): basis \(\mathbf{v}_1=\begin{bmatrix}0\\1\end{bmatrix}\). &nbsp; Untuk \(\lambda_2=3\): basis \(\mathbf{v}_2=\begin{bmatrix}1/2\\1\end{bmatrix}\).</p>
+    </div>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 4.4</span> Ruang eigen \(3\times3\) (akar berulang)</div>
+    <div class="ex-body">
+      <p>\(A=\begin{bmatrix}0&amp;0&amp;-2\\1&amp;2&amp;1\\1&amp;0&amp;3\end{bmatrix}\). Persamaan karakteristik: \((\lambda-1)(\lambda-2)^2=0\Rightarrow\lambda_1=1,\ \lambda_{2,3}=2\).</p>
+      <div class="solve">Basis ruang eigen</div>
+      <p>\(\lambda_1=1\): \(\mathbf{v}_1=\begin{bmatrix}-2\\1\\1\end{bmatrix}\). &nbsp; \(\lambda_{2,3}=2\): \(\mathbf{v}_2=\begin{bmatrix}-1\\0\\1\end{bmatrix},\mathbf{v}_3=\begin{bmatrix}0\\1\\0\end{bmatrix}\).</p>
+      <p style="margin-bottom:0" class="muted">Akar ganda \(\lambda=2\) menghasilkan ruang eigen 2 dimensi → masih bisa didiagonalisasi.</p>
+    </div>
+  </div>
+  <div class="box thm">
+    <span class="tag">Teorema 4.3 — Kaitan dengan invers</span>
+    <p style="margin-bottom:0">\(A\) memiliki invers \(\iff\) \(\lambda=0\) <strong>bukan</strong> nilai eigen dari \(A\). (Setara: \(\det(A)\ne0\).)</p>
+  </div>
+
+  <h4 class="block"><span class="ic">3</span> Diagonalisasi</h4>
+  <div class="box def">
+    <span class="tag">Teorema 4.4 — Diagonalisasi</span>
+    <p style="margin-bottom:0">\(A\) <strong>dapat didiagonalisasi</strong> jika ada \(P\) invertibel sehingga \(D=P^{-1}AP\) diagonal. Setara: \(A=PDP^{-1}\).</p>
+  </div>
+  <div class="term">
+    <div class="term-bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="ttl">diagonalisasi.steps</span></div>
+    <div class="term-body">
+<span class="prompt">Step 1 ›</span> <span class="formula-line">Cari n vektor eigen yang bebas linier</span><br>
+<span class="prompt">       </span> <span class="prompt"># jika tidak cukup → TIDAK dapat didiagonalisasi</span><br>
+<span class="prompt">Step 2 ›</span> <span class="formula-line">P = [ v₁ | v₂ | … | vₙ ]   (kolom = vektor eigen)</span><br>
+<span class="prompt">Step 3 ›</span> <span class="formula-line">D = diag(λ₁, λ₂, …, λₙ)</span> <span class="c-ok"># λᵢ sejajar kolom pᵢ</span> ✓
+    </div>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 4.7</span> Menyusun \(P\) dan \(D\)</div>
+    <div class="ex-body">
+      <p>Dari Contoh 4.4: \(\lambda_1=1,\lambda_{2,3}=2\) dengan \(\mathbf{v}_1,\mathbf{v}_2,\mathbf{v}_3\) di atas.</p>
+      <p>\[P=\begin{bmatrix}-2&amp;-1&amp;0\\1&amp;0&amp;1\\1&amp;1&amp;0\end{bmatrix},\qquad D=\begin{bmatrix}1&amp;0&amp;0\\0&amp;2&amp;0\\0&amp;0&amp;2\end{bmatrix}\]</p>
+    </div>
+  </div>
+  <div class="box warn">
+    <span class="tag">⚠️ Kapan TIDAK bisa didiagonalisasi?</span>
+    <p style="margin-bottom:0">Jika jumlah total vektor eigen bebas linier <strong>kurang dari \(n\)</strong>. Contoh 4.8: \(\dim(\text{ruang eigen})=2&lt;3\) → \(A\) tidak dapat didiagonalisasi.</p>
+  </div>
+
+  <h4 class="block"><span class="ic">4</span> Pangkat Matriks \(A^k\)</h4>
+  <div class="box thm">
+    <span class="tag">Sifat penting & Teorema 4.5</span>
+    <p>Jika \(A=PDP^{-1}\), maka menghitung pangkat jadi mudah:</p>
+    <p>\[A^k=PD^kP^{-1}=P\begin{bmatrix}\lambda_1^k&amp;&amp;\\&amp;\ddots&amp;\\&amp;&amp;\lambda_n^k\end{bmatrix}P^{-1}\]</p>
+    <p style="margin-bottom:0">Jika \(\lambda\) nilai eigen \(A\) dengan vektor eigen \(\mathbf{x}\), maka \(\lambda^k\) nilai eigen \(A^k\) dengan vektor eigen \(\mathbf{x}\) yang sama.</p>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 4.9</span> Menghitung \(A^4\)</div>
+    <div class="ex-body">
+      <p>Dengan \(P,D\) dari Contoh 4.7 dan \(P^{-1}=\begin{bmatrix}-1&amp;0&amp;-1\\1&amp;0&amp;2\\1&amp;1&amp;1\end{bmatrix}\):</p>
+      <p>\[A^4=PD^4P^{-1}=P\begin{bmatrix}1&amp;0&amp;0\\0&amp;16&amp;0\\0&amp;0&amp;16\end{bmatrix}P^{-1}=\begin{bmatrix}-14&amp;0&amp;-30\\15&amp;16&amp;15\\15&amp;0&amp;31\end{bmatrix}\]</p>
+    </div>
+  </div>
+  <div class="box tip">
+    <span class="tag">💡 Bonus: akar matriks</span>
+    <p style="margin-bottom:0">Pola yang sama berlaku untuk \(A^{1/2}=PD^{1/2}P^{-1}\) dengan \(D^{1/2}=\text{diag}(\sqrt{\lambda_1},\dots,\sqrt{\lambda_n})\) — muncul di Tugas 4. Syarat: semua \(\lambda_i\ge0\).</p>
+  </div>
+</section>
+
+<!-- ================= TRANSFORMASI LINIER ================= -->
+<section class="panel" id="tab-tl">
+  <h2 class="sec">Bab 5</h2>
+  <h3 class="title">Transformasi Linier</h3>
+  <p class="lead">Transformasi linier \(T:V\to W\) adalah pemetaan antar ruang vektor yang "mengawetkan" struktur — menjaga penjumlahan dan perkalian skalar. Jembatan antara aljabar abstrak dan matriks konkret.</p>
+
+  <h4 class="block"><span class="ic">1</span> Definisi & Sifat</h4>
+  <div class="box def">
+    <span class="tag">Definisi 5.1 — Transformasi Linier</span>
+    <p>\(T:V\to W\) linier jika untuk semua \(\mathbf{u},\mathbf{v}\in V\) dan skalar \(k\):</p>
+    <p style="margin-bottom:0">(i) <strong>Homogenitas:</strong> \(T(k\mathbf{u})=kT(\mathbf{u})\); &nbsp;&nbsp; (ii) <strong>Aditif:</strong> \(T(\mathbf{u}+\mathbf{v})=T(\mathbf{u})+T(\mathbf{v})\).</p>
+  </div>
+  <p class="muted" style="font-size:14px">Kasus khusus \(V=W\) → \(T\) disebut <strong>operator linier</strong>.</p>
+  <div class="box thm">
+    <span class="tag">Teorema 5.1 — Akibat</span>
+    <p style="margin-bottom:0">(i) \(T(\mathbf{0})=\mathbf{0}\); &nbsp; (ii) \(T(-\mathbf{v})=-T(\mathbf{v})\); &nbsp; (iii) \(T(\mathbf{u}-\mathbf{v})=T(\mathbf{u})-T(\mathbf{v})\).</p>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 5.2</span> Mengecek apakah linier</div>
+    <div class="ex-body">
+      <p>Pada \(M_{n\times n}\):</p>
+      <p>✓ <strong>\(T_1(A)=A^T\)</strong> — linier, karena \((kA)^T=kA^T\) dan \((A+B)^T=A^T+B^T\).</p>
+      <p style="margin-bottom:0">✗ <strong>\(T_2(A)=\det(A)\)</strong> — <em>bukan</em> linier, karena \(\det(kA)=k^n\det(A)\ne k\det(A)\).</p>
+    </div>
+  </div>
+  <div class="box warn">
+    <span class="tag">⚠️ Uji cepat bukan-linier</span>
+    <p style="margin-bottom:0">Jika \(T(\mathbf{0})\ne\mathbf{0}\), langsung <strong>bukan</strong> transformasi linier. Cek sifat homogenitas dengan skalar \(k\) — sering jadi penjebak (mis. determinan, kuadrat).</p>
+  </div>
+
+  <h4 class="block"><span class="ic">2</span> Transformasi via Vektor Basis</h4>
+  <div class="box thm">
+    <span class="tag">Teorema 5.2</span>
+    <p>Jika \(S=\{\mathbf{v}_1,\dots,\mathbf{v}_r\}\) basis \(V\) dan \(\mathbf{v}=k_1\mathbf{v}_1+\dots+k_r\mathbf{v}_r\), maka:</p>
+    <p style="margin-bottom:0">\[T(\mathbf{v})=k_1T(\mathbf{v}_1)+k_2T(\mathbf{v}_2)+\dots+k_rT(\mathbf{v}_r)\]</p>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 5.3</span> Menentukan rumus \(T(\mathbf{x})\)</div>
+    <div class="ex-body">
+      <p>Basis \(\mathbf{v}_1=(1,1,1),\mathbf{v}_2=(1,1,0),\mathbf{v}_3=(1,0,0)\); diketahui \(T(\mathbf{v}_1)=(1,0),T(\mathbf{v}_2)=(2,-1),T(\mathbf{v}_3)=(4,3)\).</p>
+      <div class="solve">Penyelesaian</div>
+      <p>OBE memberi \(k_1=x_3,\ k_2=x_2-x_3,\ k_3=x_1-x_2\). Substitusi:</p>
+      <p>\(T(x_1,x_2,x_3)=\big(4x_1-2x_2-x_3,\ 3x_1-4x_2+x_3\big)\).</p>
+      <p style="margin-bottom:0">Cek: \(T(2,-3,5)=(9,23)\). ✓</p>
+    </div>
+  </div>
+
+  <h4 class="block"><span class="ic">3</span> Kernel & Range</h4>
+  <div class="box def">
+    <span class="tag">Definisi 5.2 — Kernel & Range</span>
+    <p><strong>Kernel</strong> \(\ker(T)\) = semua \(\mathbf{v}\in V\) dengan \(T(\mathbf{v})=\mathbf{0}\) (yang "dimatikan" \(T\)).</p>
+    <p style="margin-bottom:0"><strong>Range</strong> \(\text{range}(T)\) = semua bayangan \(T(\mathbf{v})\) di \(W\).</p>
+  </div>
+  <div class="box def">
+    <span class="tag">Definisi 5.3 — Teorema Dimensi</span>
+    <p style="margin-bottom:0">\(\text{rank}(T)=\dim(\text{range})\), \(\;\text{nulitas}(T)=\dim(\ker)\), dan &nbsp; \(\boxed{\dim(V)=\text{rank}(T)+\text{nulitas}(T)}\)</p>
+  </div>
+  <div class="box tip">
+    <span class="tag">💡 Kaitan matriks</span>
+    <p style="margin-bottom:0">Untuk \(T_A(\mathbf{x})=A\mathbf{x}\): &nbsp; \(\ker(T_A)=\) ruang null \(A\), &nbsp; \(\text{range}(T_A)=\) ruang kolom \(A\). Konsep Bab 3 kembali!</p>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 5.5</span> Basis kernel & range pada polinomial</div>
+    <div class="ex-body">
+      <p>\(T:P_3\to P_2\), \(\;T(a_0+a_1x+a_2x^2+a_3x^3)=5a_0+a_3x^2\).</p>
+      <div class="solve">Penyelesaian</div>
+      <p>\(\ker(T)\): butuh \(5a_0=0\) dan \(a_3=0\Rightarrow a_0=a_3=0\). Basis \(\{x,x^2\}\), nulitas \(=2\).</p>
+      <p style="margin-bottom:0">\(\text{range}(T)\): basis \(\{5,x^2\}\), rank \(=2\). Cek: \(\dim(P_3)=2+2=4\). ✓</p>
+    </div>
+  </div>
+
+  <h4 class="block"><span class="ic">4</span> Transformasi Satu-Satu & Invers</h4>
+  <div class="box thm">
+    <span class="tag">Teorema 5.3 — Satu-satu</span>
+    <p style="margin-bottom:0">\(T\) <strong>satu-satu</strong> (injektif) \(\iff\ker(T)=\{\mathbf{0}\}\). &nbsp; Inversnya \(T^{-1}:\text{range}(T)\to V\) memenuhi \(T^{-1}(T(\mathbf{v}))=\mathbf{v}\).</p>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 5.8</span> Cek satu-satu & cari \(T^{-1}\)</div>
+    <div class="ex-body">
+      <p>\(T(x_1,x_2,x_3)=(3x_1+x_3,\ -2x_1-4x_2+3x_3,\ 5x_1+4x_2-x_3)\).</p>
+      <div class="solve">Penyelesaian</div>
+      <p>Susun matriks \(A\), OBE \(A\mathbf{x}=\mathbf{0}\) memberi hanya solusi trivial → \(\ker(T)=\{\mathbf{0}\}\), jadi satu-satu.</p>
+      <p style="margin-bottom:0">Cari \(T^{-1}\) lewat \([A\,|\,I]\xrightarrow{\text{OBE}}[I\,|\,A^{-1}]\), lalu \(T^{-1}(\mathbf{x})=A^{-1}\mathbf{x}\).</p>
+    </div>
+  </div>
+
+  <h4 class="block"><span class="ic">5</span> Matriks Transformasi Linier Umum</h4>
+  <p>Untuk \(T:V\to W\) dengan basis \(B\) (untuk \(V\)) dan \(B'\) (untuk \(W\)), ada matriks \(A=[T]_{B,B'}\) sehingga:</p>
+  <div class="box def">
+    <span class="tag">Pers. 5.3 & 5.4</span>
+    <p>\[A\,[\mathbf{x}]_B=[T(\mathbf{x})]_{B'},\qquad [T]_{B,B'}=\big[\,[T(\mathbf{b}_1)]_{B'}\ \cdots\ [T(\mathbf{b}_n)]_{B'}\,\big]\]</p>
+    <p style="margin-bottom:0">Artinya: <strong>kolom ke-\(i\)</strong> dari matriks transformasi = koordinat \(T(\mathbf{b}_i)\) relatif terhadap \(B'\).</p>
+  </div>
+  <div class="term">
+    <div class="term-bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="ttl">transformasi_tak_langsung.steps</span></div>
+    <div class="term-body">
+<span class="prompt">Step 1 ›</span> <span class="formula-line">Hitung [x]_B  (koordinat x terhadap basis B)</span><br>
+<span class="prompt">Step 2 ›</span> <span class="formula-line">[T(x)]_B' = [T]_{B,B'} · [x]_B</span><br>
+<span class="prompt">Step 3 ›</span> <span class="c-ok">Rakit T(x) dari koordinat [T(x)]_B'</span> ✓
+    </div>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 5.9</span> Matriks transformasi & \(T(\mathbf{x})\) tak langsung</div>
+    <div class="ex-body">
+      <p>\(T(x_1,x_2)=(x_1+x_2,\ -2x_1+4x_2)\), basis \(B=\{(1,1),(1,2)\}\).</p>
+      <div class="solve">a) Matriks transformasi</div>
+      <p>\(T(\mathbf{v}_1)=(2,2),T(\mathbf{v}_2)=(3,6)\). Koordinatkan terhadap \(B\): &nbsp; \([T]_B=\begin{bmatrix}2&amp;0\\0&amp;3\end{bmatrix}\).</p>
+      <div class="solve">b) Hitung \(T(2,1)\)</div>
+      <p>\([\mathbf{x}]_B=\begin{bmatrix}3\\-1\end{bmatrix}\Rightarrow[T(\mathbf{x})]_B=\begin{bmatrix}2&amp;0\\0&amp;3\end{bmatrix}\begin{bmatrix}3\\-1\end{bmatrix}=\begin{bmatrix}6\\-3\end{bmatrix}\).</p>
+      <p style="margin-bottom:0">\(T(\mathbf{x})=6\mathbf{v}_1-3\mathbf{v}_2=(6,6)-(3,6)=(3,0)\).</p>
+    </div>
+  </div>
+  <div class="ex">
+    <div class="ex-head"><span class="badge">Contoh 5.11</span> Transformasi pada polinomial</div>
+    <div class="ex-body">
+      <p>\(T:P_2\to P_2\), \(T(p(x))=p(3x-5)\), basis \(B=\{1,x,x^2\}\).</p>
+      <div class="solve">Penyelesaian</div>
+      <p>\(T(1)=1,\ T(x)=3x-5,\ T(x^2)=9x^2-30x+25\). Maka:</p>
+      <p>\[[T]_B=\begin{bmatrix}1&amp;-5&amp;25\\0&amp;3&amp;-30\\0&amp;0&amp;9\end{bmatrix}\]</p>
+      <p style="margin-bottom:0">Untuk \(p=1+2x+3x^2\): \([T(p)]_B=[T]_B\begin{bmatrix}1\\2\\3\end{bmatrix}=\begin{bmatrix}66\\-84\\27\end{bmatrix}\Rightarrow T(p)=66-84x+27x^2\).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section class="panel" id="tab-quiz">
+  <h2 class="sec">Uji pemahaman</h2>
+  <h3 class="title">Latihan & Kuis</h3>
+  <p class="lead">Klik jawaban untuk langsung melihat apakah benar beserta penjelasannya. Cobalah dulu tanpa melihat catatan — 12 soal mencakup keempat bab.</p>
+
+  <div class="quiz">
+    <p class="q"><span class="qnum">01 · Ruang Vektor</span><br>Berapa banyak aksioma yang harus dipenuhi sebuah himpunan agar disebut ruang vektor?</p>
+    <div class="opts">
+      <button class="opt"><span class="lbl">A</span> 4 aksioma</button>
+      <button class="opt"><span class="lbl">B</span> 8 aksioma</button>
+      <button class="opt" data-correct="1"><span class="lbl">C</span> 10 aksioma</button>
+      <button class="opt"><span class="lbl">D</span> 12 aksioma</button>
+    </div>
+    <div class="explain"><b>Benar: C.</b> Teorema 3.1 mendaftar 10 aksioma — 5 untuk penjumlahan (tertutup, komutatif, asosiatif, ada \(\mathbf{0}\), ada invers) dan 5 untuk perkalian skalar.</div>
+  </div>
+
+  <div class="quiz">
+    <p class="q"><span class="qnum">02 · Subruang</span><br>\(W\subset V\) langsung BUKAN subruang jika…</p>
+    <div class="opts">
+      <button class="opt" data-correct="1"><span class="lbl">A</span> \(\mathbf{0}\notin W\)</button>
+      <button class="opt"><span class="lbl">B</span> \(W\) berhingga</button>
+      <button class="opt"><span class="lbl">C</span> \(W\) memuat lebih dari satu vektor</button>
+      <button class="opt"><span class="lbl">D</span> \(W=V\)</button>
+    </div>
+    <div class="explain"><b>Benar: A.</b> Setiap subruang harus memuat vektor nol (akibat sifat tertutup \(0\cdot\mathbf{u}=\mathbf{0}\)). Jika \(\mathbf{0}\notin W\), gagal jadi subruang.</div>
+  </div>
+
+  <div class="quiz">
+    <p class="q"><span class="qnum">03 · Bebas Linier</span><br>Jika \(S\) memuat 4 vektor di \(\mathbb{R}^3\), maka \(S\)…</p>
+    <div class="opts">
+      <button class="opt"><span class="lbl">A</span> pasti bebas linier</button>
+      <button class="opt" data-correct="1"><span class="lbl">B</span> pasti TIDAK bebas linier</button>
+      <button class="opt"><span class="lbl">C</span> pasti merentang \(\mathbb{R}^3\)</button>
+      <button class="opt"><span class="lbl">D</span> pasti basis \(\mathbb{R}^3\)</button>
+    </div>
+    <div class="explain"><b>Benar: B.</b> Jika \(r&gt;n\) (di sini \(4&gt;3\)), himpunan pasti bergantung linier — terlalu banyak vektor dibanding dimensi ruang.</div>
+  </div>
+
+  <div class="quiz">
+    <p class="q"><span class="qnum">04 · Basis</span><br>Sebuah himpunan \(S\) adalah basis untuk \(V\) jika dan hanya jika \(S\)…</p>
+    <div class="opts">
+      <button class="opt"><span class="lbl">A</span> hanya merentang \(V\)</button>
+      <button class="opt"><span class="lbl">B</span> hanya bebas linier</button>
+      <button class="opt" data-correct="1"><span class="lbl">C</span> merentang \(V\) DAN bebas linier</button>
+      <button class="opt"><span class="lbl">D</span> memuat vektor nol</button>
+    </div>
+    <div class="explain"><b>Benar: C.</b> Definisi 3.5: basis harus memenuhi <em>kedua</em> syarat — merentang dan bebas linier (himpunan minimal yang membangun \(V\)).</div>
+  </div>
+
+  <div class="quiz">
+    <p class="q"><span class="qnum">05 · Dimensi</span><br>Berapakah \(\dim(P_3)\) (polinomial berderajat \(\le3\))?</p>
+    <div class="opts">
+      <button class="opt"><span class="lbl">A</span> 3</button>
+      <button class="opt" data-correct="1"><span class="lbl">B</span> 4</button>
+      <button class="opt"><span class="lbl">C</span> 9</button>
+      <button class="opt"><span class="lbl">D</span> tak hingga</button>
+    </div>
+    <div class="explain"><b>Benar: B.</b> \(\dim(P_n)=n+1\). Basis standar \(P_3\) adalah \(\{1,x,x^2,x^3\}\) → 4 vektor.</div>
+  </div>
+
+  <div class="quiz">
+    <p class="q"><span class="qnum">06 · Rank–Nulitas</span><br>Matriks \(A\) berukuran \(4\times6\) memiliki \(\text{rank}(A)=2\). Berapa nulitasnya?</p>
+    <div class="opts">
+      <button class="opt"><span class="lbl">A</span> 2</button>
+      <button class="opt" data-correct="1"><span class="lbl">B</span> 4</button>
+      <button class="opt"><span class="lbl">C</span> 6</button>
+      <button class="opt"><span class="lbl">D</span> 0</button>
+    </div>
+    <div class="explain"><b>Benar: B.</b> Teorema rank–nulitas: \(\text{rank}+\text{nulitas}=n\) (jumlah kolom). Di sini \(n=6\), jadi nulitas \(=6-2=4\).</div>
+  </div>
+
+  <div class="quiz">
+    <p class="q"><span class="qnum">07 · Ortogonalitas</span><br>Dua vektor \(\mathbf{u},\mathbf{v}\) di RHKD disebut ortogonal jika…</p>
+    <div class="opts">
+      <button class="opt"><span class="lbl">A</span> \(\|\mathbf{u}\|=\|\mathbf{v}\|\)</button>
+      <button class="opt" data-correct="1"><span class="lbl">B</span> \(\langle\mathbf{u},\mathbf{v}\rangle=0\)</button>
+      <button class="opt"><span class="lbl">C</span> \(\langle\mathbf{u},\mathbf{v}\rangle=1\)</button>
+      <button class="opt"><span class="lbl">D</span> \(\mathbf{u}=\mathbf{v}\)</button>
+    </div>
+    <div class="explain"><b>Benar: B.</b> Definisi 3.11: ortogonal berarti hasil kali dalamnya nol — generalisasi dari "tegak lurus".</div>
+  </div>
+
+  <div class="quiz">
+    <p class="q"><span class="qnum">08 · Gram-Schmidt</span><br>Langkah pertama proses Gram-Schmidt adalah…</p>
+    <div class="opts">
+      <button class="opt" data-correct="1"><span class="lbl">A</span> \(\mathbf{v}_1=\mathbf{u}_1\)</button>
+      <button class="opt"><span class="lbl">B</span> \(\mathbf{v}_1=\mathbf{u}_1/\|\mathbf{u}_1\|\)</button>
+      <button class="opt"><span class="lbl">C</span> \(\mathbf{v}_1=\mathbf{u}_1-\mathbf{u}_2\)</button>
+      <button class="opt"><span class="lbl">D</span> \(\mathbf{v}_1=\mathbf{0}\)</button>
+    </div>
+    <div class="explain"><b>Benar: A.</b> Vektor pertama langsung diambil apa adanya \((\mathbf{v}_1=\mathbf{u}_1)\). Normalisasi (membagi norm) baru dilakukan di akhir untuk membentuk basis ortonormal.</div>
+  </div>
+
+  <div class="quiz">
+    <p class="q"><span class="qnum">09 · Persamaan Karakteristik</span><br>Nilai eigen \(\lambda\) dari \(A\) diperoleh dari persamaan…</p>
+    <div class="opts">
+      <button class="opt"><span class="lbl">A</span> \(\det(A)=\lambda\)</button>
+      <button class="opt"><span class="lbl">B</span> \(A\mathbf{x}=\mathbf{0}\)</button>
+      <button class="opt" data-correct="1"><span class="lbl">C</span> \(\det(A-\lambda I)=0\)</button>
+      <button class="opt"><span class="lbl">D</span> \(A+\lambda I=0\)</button>
+    </div>
+    <div class="explain"><b>Benar: C.</b> Teorema 4.1 — persamaan karakteristik \(\det(A-\lambda I)=0\) memberi semua nilai eigen.</div>
+  </div>
+
+  <div class="quiz">
+    <p class="q"><span class="qnum">10 · Nilai Eigen</span><br>Nilai eigen dari \(A=\begin{bmatrix}5&amp;2&amp;7\\0&amp;-3&amp;1\\0&amp;0&amp;4\end{bmatrix}\) adalah…</p>
+    <div class="opts">
+      <button class="opt" data-correct="1"><span class="lbl">A</span> \(5,\ -3,\ 4\)</button>
+      <button class="opt"><span class="lbl">B</span> \(2,\ 7,\ 1\)</button>
+      <button class="opt"><span class="lbl">C</span> \(0,\ 0,\ 0\)</button>
+      <button class="opt"><span class="lbl">D</span> harus dihitung \(\det(A-\lambda I)\)</button>
+    </div>
+    <div class="explain"><b>Benar: A.</b> \(A\) matriks <strong>segitiga atas</strong>, jadi nilai eigennya = elemen diagonal utama: \(5,-3,4\). Pintasan menghemat banyak waktu.</div>
+  </div>
+
+  <div class="quiz">
+    <p class="q"><span class="qnum">11 · Diagonalisasi</span><br>Matriks \(A_{n\times n}\) dapat didiagonalisasi jika dan hanya jika…</p>
+    <div class="opts">
+      <button class="opt"><span class="lbl">A</span> semua nilai eigennya positif</button>
+      <button class="opt"><span class="lbl">B</span> \(\det(A)=0\)</button>
+      <button class="opt" data-correct="1"><span class="lbl">C</span> punya \(n\) vektor eigen bebas linier</button>
+      <button class="opt"><span class="lbl">D</span> \(A\) simetris</button>
+    </div>
+    <div class="explain"><b>Benar: C.</b> Syaratnya cukup tersedia \(n\) vektor eigen bebas linier untuk menyusun \(P\). Jika kurang dari \(n\) (mis. Contoh 4.8) → tidak dapat didiagonalisasi.</div>
+  </div>
+
+  <div class="quiz">
+    <p class="q"><span class="qnum">12 · Transformasi Linier</span><br>Transformasi linier \(T:V\to W\) bersifat satu-satu jika dan hanya jika…</p>
+    <div class="opts">
+      <button class="opt"><span class="lbl">A</span> \(\text{range}(T)=W\)</button>
+      <button class="opt" data-correct="1"><span class="lbl">B</span> \(\ker(T)=\{\mathbf{0}\}\)</button>
+      <button class="opt"><span class="lbl">C</span> \(\text{rank}(T)=0\)</button>
+      <button class="opt"><span class="lbl">D</span> \(T(\mathbf{0})\ne\mathbf{0}\)</button>
+    </div>
+    <div class="explain"><b>Benar: B.</b> Teorema 5.3 — \(T\) satu-satu \(\iff\) kernelnya hanya memuat vektor nol. (Pilihan A adalah syarat <em>pada/surjektif</em>, bukan satu-satu.)</div>
+  </div>
+
+  <div class="box tip">
+    <span class="tag">💡 Setelah kuis</span>
+    <p style="margin-bottom:0">Soal yang masih ragu? Buka tab babnya lagi, lalu kerjakan ulang contoh terselesaikan dengan tangan. Untuk latihan tipe ujian, lihat pola soal <strong>Tugas 4</strong>: (1) buktikan RHKD + Gram-Schmidt berparameter, (2) eigen → diagonalisasi → \(M^{1/2}\), (3) transformasi pada \(M_{2\times2}\).</p>
+  </div>
+</section>
+
+<!-- ================= CHEAT SHEET ================= -->
+<section class="panel" id="tab-cheat">
+  <h2 class="sec">Rangkuman padat</h2>
+  <h3 class="title">Cheat Sheet Rumus</h3>
+  <p class="lead">Semua rumus & kriteria kunci dalam satu halaman — ideal untuk review cepat sebelum ujian. Cetak atau simpan sebagai PDF dari browser (Ctrl/Cmd + P).</p>
+
+  <div class="cheat-grid">
+
+    <div class="cheat">
+      <div class="ch-head"><span class="n">B3</span> Ruang Vektor & Basis</div>
+      <div class="ch-body">
+        <div class="row"><div class="k">Subruang \(W\subset V\)</div><div class="v">Tertutup: \(\mathbf{u}+\mathbf{v}\in W\) &amp; \(c\mathbf{u}\in W\)</div></div>
+        <div class="row"><div class="k">Merentang</div><div class="v">\(k_1\mathbf{v}_1+\dots+k_r\mathbf{v}_r=\mathbf{v}\) konsisten</div></div>
+        <div class="row"><div class="k">Bebas linier</div><div class="v">\(\sum k_i\mathbf{v}_i=\mathbf{0}\) hanya solusi trivial</div></div>
+        <div class="row"><div class="k">Basis</div><div class="v">merentang + bebas linier</div></div>
+        <div class="row"><div class="k">Dimensi standar</div><div class="v">\(\dim\mathbb{R}^n=n\), \(\dim P_n=n+1\), \(\dim M_{m\times n}=mn\)</div></div>
+      </div>
+    </div>
+
+    <div class="cheat">
+      <div class="ch-head"><span class="n">B3</span> Koordinat & Ruang Matriks</div>
+      <div class="ch-body">
+        <div class="row"><div class="k">Vektor koordinat</div><div class="v">\(\mathbf{v}=\sum c_i\mathbf{v}_i\Rightarrow(\mathbf{v})_S=(c_1,\dots,c_r)\)</div></div>
+        <div class="row"><div class="k">Perubahan basis</div><div class="v">\([\mathbf{v}]_{B'}=P\,[\mathbf{v}]_B\)</div></div>
+        <div class="row"><div class="k">Konsistensi</div><div class="v">\(A\mathbf{x}=\mathbf{b}\) konsisten \(\iff\mathbf{b}\in\) ruang kolom</div></div>
+        <div class="row"><div class="k">Rank–Nulitas</div><div class="v">\(\text{rank}(A)+\text{nulitas}(A)=n\)</div></div>
+        <div class="row"><div class="k">Dim. baris = kolom</div><div class="v">selalu sama (= rank)</div></div>
+      </div>
+    </div>
+
+    <div class="cheat">
+      <div class="ch-head"><span class="n">3.2</span> Hasil Kali Dalam</div>
+      <div class="ch-body">
+        <div class="row"><div class="k">Norm & jarak</div><div class="v">\(\|\mathbf{v}\|=\sqrt{\langle\mathbf{v},\mathbf{v}\rangle}\), \(d=\|\mathbf{u}-\mathbf{v}\|\)</div></div>
+        <div class="row"><div class="k">Berbobot</div><div class="v">\(\langle\mathbf{u},\mathbf{v}\rangle=\sum w_iu_iv_i\)</div></div>
+        <div class="row"><div class="k">Matriks / Polinom</div><div class="v">\(\text{tr}(A^TB)\) &nbsp;/&nbsp; \(\sum a_ib_i\)</div></div>
+        <div class="row"><div class="k">Fungsi</div><div class="v">\(\langle f,g\rangle=\int_a^b f g\,dx\)</div></div>
+        <div class="row"><div class="k">Sudut</div><div class="v">\(\cos\theta=\dfrac{\langle\mathbf{u},\mathbf{v}\rangle}{\|\mathbf{u}\|\|\mathbf{v}\|}\)</div></div>
+        <div class="row"><div class="k">Ortogonal</div><div class="v">\(\langle\mathbf{u},\mathbf{v}\rangle=0\); Cauchy-Schwarz: \(|\langle\mathbf{u},\mathbf{v}\rangle|\le\|\mathbf{u}\|\|\mathbf{v}\|\)</div></div>
+      </div>
+    </div>
+
+    <div class="cheat">
+      <div class="ch-head"><span class="n">3.2</span> Gram-Schmidt</div>
+      <div class="ch-body">
+        <div class="row"><div class="k">Langkah</div><div class="v">\(\mathbf{v}_1=\mathbf{u}_1\); &nbsp; \(\mathbf{v}_k=\mathbf{u}_k-\sum_{i&lt;k}\dfrac{\langle\mathbf{u}_k,\mathbf{v}_i\rangle}{\|\mathbf{v}_i\|^2}\mathbf{v}_i\)</div></div>
+        <div class="row"><div class="k">Ortonormal</div><div class="v">\(\mathbf{q}_i=\dfrac{\mathbf{v}_i}{\|\mathbf{v}_i\|}\)</div></div>
+        <div class="row"><div class="k">Catatan</div><div class="v">pakai hasil kali dalam yang didefinisikan soal</div></div>
+      </div>
+    </div>
+
+    <div class="cheat">
+      <div class="ch-head"><span class="n">B4</span> Eigen & Diagonalisasi</div>
+      <div class="ch-body">
+        <div class="row"><div class="k">Definisi</div><div class="v">\(A\mathbf{x}=\lambda\mathbf{x}\)</div></div>
+        <div class="row"><div class="k">Nilai eigen</div><div class="v">\(\det(A-\lambda I)=0\)</div></div>
+        <div class="row"><div class="k">Vektor eigen</div><div class="v">ruang null \((A-\lambda I)\mathbf{x}=\mathbf{0}\)</div></div>
+        <div class="row"><div class="k">Segitiga/diagonal</div><div class="v">nilai eigen = elemen diagonal</div></div>
+        <div class="row"><div class="k">Punya invers</div><div class="v">\(\iff\lambda=0\) bukan nilai eigen</div></div>
+        <div class="row"><div class="k">Diagonalisasi</div><div class="v">\(D=P^{-1}AP\), \(P=[\mathbf{v}_1\cdots\mathbf{v}_n]\)</div></div>
+        <div class="row"><div class="k">Pangkat</div><div class="v">\(A^k=PD^kP^{-1}\), \(D^k=\text{diag}(\lambda_i^k)\)</div></div>
+      </div>
+    </div>
+
+    <div class="cheat">
+      <div class="ch-head"><span class="n">B5</span> Transformasi Linier</div>
+      <div class="ch-body">
+        <div class="row"><div class="k">Linier</div><div class="v">\(T(k\mathbf{u})=kT(\mathbf{u})\), \(T(\mathbf{u}+\mathbf{v})=T(\mathbf{u})+T(\mathbf{v})\)</div></div>
+        <div class="row"><div class="k">Via basis</div><div class="v">\(T(\mathbf{v})=\sum k_iT(\mathbf{v}_i)\)</div></div>
+        <div class="row"><div class="k">Kernel / Range</div><div class="v">\(T(\mathbf{v})=\mathbf{0}\) &nbsp;/&nbsp; semua bayangan</div></div>
+        <div class="row"><div class="k">Teorema dimensi</div><div class="v">\(\dim V=\text{rank}(T)+\text{nulitas}(T)\)</div></div>
+        <div class="row"><div class="k">Satu-satu</div><div class="v">\(\iff\ker(T)=\{\mathbf{0}\}\)</div></div>
+        <div class="row"><div class="k">Matriks transformasi</div><div class="v">\([T]_{B,B'}=\big[[T(\mathbf{b}_i)]_{B'}\big]\), \(A[\mathbf{x}]_B=[T(\mathbf{x})]_{B'}\)</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="box def" style="margin-top:22px">
+    <span class="tag">🧭 Benang merah</span>
+    <p style="margin-bottom:0">Hampir semua soal berakhir pada satu langkah yang sama: <strong>susun matriks augmented → OBE (Gauss-Jordan)</strong>. Entah untuk uji merentang/bebas linier, cari koordinat, ruang null, vektor eigen, atau matriks transformasi. Kuasai OBE, dan separuh ujian selesai.</p>
+  </div>
+</section>
+<!--END-->
+</main>
+
+<footer class="foot">
+  <p>Panduan belajar disusun dari materi <b>MSA01 Aljabar Linier</b> — Universitas Bunda Mulia. Notasi mengikuti catatan kuliah <b>Marshellino, S.Mat., M.Si. (2025)</b>.</p>
+  <p class="muted">Gunakan untuk belajar mandiri. Selalu cek kembali dengan catatan & dosen pengampu.</p>
+</footer>
+
+<button class="back-top" id="backTop" aria-label="Kembali ke atas">↑</button>
+
+<script>
+  // Tab switching
+  const tabBtns=document.querySelectorAll('.tab-btn');
+  const panels=document.querySelectorAll('.panel');
+  function activate(id){
+    tabBtns.forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+    panels.forEach(p=>p.classList.toggle('active',p.id==='tab-'+id));
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(window.MathJax&&window.MathJax.typesetPromise){window.MathJax.typesetPromise();}
+  }
+  tabBtns.forEach(b=>b.addEventListener('click',()=>activate(b.dataset.tab)));
+  document.querySelectorAll('[data-goto]').forEach(el=>{
+    el.addEventListener('click',()=>activate(el.dataset.goto));
+  });
+
+  // Quiz logic
+  document.addEventListener('click',e=>{
+    const opt=e.target.closest('.opt');
+    if(!opt||opt.disabled)return;
+    const quiz=opt.closest('.quiz');
+    const opts=quiz.querySelectorAll('.opt');
+    const exp=quiz.querySelector('.explain');
+    opts.forEach(o=>{
+      o.disabled=true;
+      if(o.dataset.correct==='1')o.classList.add('correct');
+    });
+    if(opt.dataset.correct!=='1')opt.classList.add('wrong');
+    if(exp)exp.classList.add('show');
+  });
+
+  // Back to top
+  const bt=document.getElementById('backTop');
+  window.addEventListener('scroll',()=>{bt.classList.toggle('show',window.scrollY>500)});
+  bt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+</body>
+</html>
